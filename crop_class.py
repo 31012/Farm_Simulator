@@ -13,14 +13,9 @@ class Crop:
         self._status = "Seed"
         self._type = "Generic"
         #Above attributes are private, due to the _ underscore infront of them
-
-def main():
-    #class instantiation
-    new_crop = Crop(1,5,4)
-    #crop test
-    print(new_crop._status)
-    print(new_crop._light_need)
-    print(new_crop._water_need)
-
+    def needs():
+        pass
+    def report():
+        pass
 if __name__ == "__main__":
     main()
