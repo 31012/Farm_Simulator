@@ -1,14 +1,16 @@
 import sys
+import random
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from radio_button_widget_class import *
-from crop_class import *
+from potato_class import *
+from wheat_class import *
+
 
 class CropWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("FarmBoyz 2000")
-        self.simulated_crop = ""
         #create stacked layout
         self.stacked_layout = QStackedLayout()
         #create widget wrapper
@@ -17,7 +19,6 @@ class CropWindow(QMainWindow):
         self.stacked_widget.setLayout(self.stacked_layout)
         #instaniate layouts to stack
         self.create_select_crop_layout()
-        self.create_view_crop_layout(self.simulated_crop)
         #set index of stack
         self.stacked_layout.setCurrentIndex(0)
         #mount widget
@@ -33,22 +34,23 @@ class CropWindow(QMainWindow):
         self.initial_layout.addWidget(self.instantiate_button)
         self.select_crop_widget = QWidget()
         self.select_crop_widget.setLayout(self.initial_layout)
-        #mount widget 
-        self.setCentralWidget(self.select_crop_widget)
+        #mount widget to stack
+        self.stacked_layout.addWidget(self.select_crop_widget)
         #connections
         self.instantiate_button.clicked.connect(self.instantiate_crop)
-        self.instantiate_button.clicked.connect(self.swap_stack)
-    def swap_stack(self):
-        self.stacked_layout.setCurrentIndex(1)
-
-        #Crop() is a placeholder until my repo is updated
-        #Wheat() and Potato() will replace both
+        
     def instantiate_crop(self):
         crop_type = self.crop_radio_buttons.selected_button()
         if crop_type == 1:
-            self.simulated_crop = Crop(1,7,6)
+            self.simulated_crop = Wheat()
         if crop_type == 2:
-            self.simulated_crop = Crop(1,4,7)
+            self.simulated_crop = Potato()
+        #instantiate view crop
+        self.create_view_crop_layout(crop_type)
+        #add widget to stack
+        self.stacked_layout.addWidget(self.view_crop_widget)
+        #change index
+        self.stacked_layout.setCurrentIndex(1)
 
     def create_view_crop_layout(self,crop_type):
         #second layout window - veiw the crop growth
@@ -75,14 +77,28 @@ class CropWindow(QMainWindow):
         self.status_grid.addWidget(self.days_line_edit,1,1)
         self.status_grid.addWidget(self.status_line_edit,2,1)
         #add widgets to the grow layout
-        self.grow_grid.addLayouts(self.status_grid,0,1)
-        self.grow_grid.addLayouts(self.manual_grow_button,1,0)
-        self.grow_grid.addLayouts(self.automatic_grow_button,1,1)
+        self.grow_grid.addLayout(self.status_grid,0,1)
+        self.grow_grid.addWidget(self.manual_grow_button,1,0)
+        self.grow_grid.addWidget(self.auto_grow_button,1,1)
         #create a widget to display the grow layout
         self.view_crop_widget = QWidget()
         self.view_crop_widget.setLayout(self.grow_grid)
-        
+        #connections
+        self.auto_grow_button.clicked.connect(self.auto_grow_crop)
 
+    def auto_grow_crop(self):
+        for day in range(30):
+            light = random.randint(1,10)
+            water = random.randint(1,10)
+            self.simulated_crop.grow(light,water)
+        self.update_crop_veiw_status()
+        
+    def update_crop_veiw_status(self):
+        crop_status_report = self.simulated_crop.report()
+        #update text
+        self.growth_line_edit.setText(str(crop_status_report["growth"]))
+        self.days_line_edit.setText(str(crop_status_report["days growing"]))
+        self.status_line_edit.setText(str(crop_status_report["status"]))
         
         
 if __name__ == "__main__":
